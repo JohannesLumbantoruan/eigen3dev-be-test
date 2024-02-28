@@ -2,6 +2,8 @@
 CREATE TABLE "members" (
     "code" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
 
     CONSTRAINT "members_pkey" PRIMARY KEY ("code")
 );
@@ -23,7 +25,8 @@ CREATE TABLE "book_loans" (
     "book_id" TEXT NOT NULL,
     "date_borrowed" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "date_due" TIMESTAMP(3) NOT NULL,
-    "returned" BOOLEAN NOT NULL,
+    "date_returned" TIMESTAMP(3),
+    "returned" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "book_loans_pkey" PRIMARY KEY ("id")
 );
@@ -39,13 +42,16 @@ CREATE TABLE "penalties" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "members_username_key" ON "members"("username");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "penalties_member_id_key" ON "penalties"("member_id");
 
 -- AddForeignKey
-ALTER TABLE "book_loans" ADD CONSTRAINT "book_loans_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "members"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "book_loans" ADD CONSTRAINT "book_loans_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "members"("code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "book_loans" ADD CONSTRAINT "book_loans_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "book_loans" ADD CONSTRAINT "book_loans_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "books"("code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "penalties" ADD CONSTRAINT "penalties_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "members"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "penalties" ADD CONSTRAINT "penalties_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "members"("code") ON DELETE CASCADE ON UPDATE CASCADE;

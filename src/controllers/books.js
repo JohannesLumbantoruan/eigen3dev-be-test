@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require("crypto");
 const prisma = require("../data/prisma-client");
 const handleError = require("../utils/handle-error");
 
@@ -7,14 +7,14 @@ exports.getAll = async (req, res, next) => {
     const books = await prisma.book.findMany({
       where: {
         stock: {
-          gt: 0
-        }
-      }
+          gt: 0,
+        },
+      },
     });
 
     res.status(200).json({
       success: true,
-      books
+      books,
     });
   } catch (error) {
     handleError(error, res);
@@ -25,20 +25,20 @@ exports.store = async (req, res, next) => {
   const { title, author, stock } = req.body;
 
   try {
-    const code = 'book-' + crypto.randomUUID();
+    const code = "book-" + crypto.randomUUID();
 
     const book = await prisma.book.create({
       data: {
         code,
         title,
         author,
-        stock
-      }
+        stock,
+      },
     });
 
     res.status(201).json({
       success: true,
-      book
+      book,
     });
   } catch (error) {
     handleError(error, res);
@@ -51,12 +51,12 @@ exports.getById = async (req, res, next) => {
   try {
     const book = await prisma.book.findFirst({
       where: {
-        code
-      }
+        code,
+      },
     });
 
     if (!book) {
-      const error = new Error('Book not found!');
+      const error = new Error("Book not found!");
       error.code = 404;
 
       throw error;
@@ -64,7 +64,7 @@ exports.getById = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      book
+      book,
     });
   } catch (error) {
     handleError(error, res);
@@ -77,19 +77,19 @@ exports.borrow = async (req, res, next) => {
   try {
     const book = await prisma.book.findFirst({
       where: {
-        code
-      }
+        code,
+      },
     });
 
     if (!book) {
-      const error = new Error('Book not found!');
+      const error = new Error("Book not found!");
       error.code = 404;
 
       throw error;
     }
 
     if (book.stock === 0) {
-      const error = new Error('All book already borrowed!');
+      const error = new Error("All book already borrowed!");
       error.code = 400;
 
       throw error;
@@ -99,12 +99,12 @@ exports.borrow = async (req, res, next) => {
 
     const penalty = await prisma.penalty.findFirst({
       where: {
-        memberId: userId
-      }
+        memberId: userId,
+      },
     });
 
     if (penalty && new Date(penalty.penaltyEnd).getTime() > Date.now()) {
-      const error = new Error('Can\'t borrow, you are still penalized!');
+      const error = new Error("Can't borrow, you are still penalized!");
       error.code = 400;
 
       throw error;
@@ -113,20 +113,20 @@ exports.borrow = async (req, res, next) => {
     const bookLoans = await prisma.bookLoans.findMany({
       where: {
         memberId: userId,
-        returned: false
-      }
+        returned: false,
+      },
     });
 
     if (bookLoans.length === 2) {
-      const error = new Error('You can\'t borrow more than 2 books!');
+      const error = new Error("You can't borrow more than 2 books!");
       error.code = 400;
 
       throw error;
     }
 
-    const id = 'bl-' + crypto.randomUUID();
+    const id = "bl-" + crypto.randomUUID();
     const dateBorrowed = new Date();
-    const dateDue = new Date(dateBorrowed.getTime() + (1000 * 60 * 60 * 24 * 7));
+    const dateDue = new Date(dateBorrowed.getTime() + 1000 * 60 * 60 * 24 * 7);
 
     const bookLoan = await prisma.bookLoans.create({
       data: {
@@ -134,22 +134,22 @@ exports.borrow = async (req, res, next) => {
         memberId: userId,
         bookId: code,
         dateBorrowed,
-        dateDue
-      }
+        dateDue,
+      },
     });
 
     await prisma.book.update({
       where: {
-        code
+        code,
       },
       data: {
-        stock: book.stock - 1
-      }
+        stock: book.stock - 1,
+      },
     });
 
     res.status(201).json({
       success: true,
-      bookLoan
+      bookLoan,
     });
   } catch (error) {
     handleError(error, res);
@@ -162,12 +162,12 @@ exports.returnBook = async (req, res, next) => {
   try {
     const bookLoan = await prisma.bookLoans.findFirst({
       where: {
-        id: loanId
-      }
+        id: loanId,
+      },
     });
 
     if (!bookLoan) {
-      const error = new Error('Book loan not found!');
+      const error = new Error("Book loan not found!");
       error.code = 404;
 
       throw error;
@@ -176,21 +176,21 @@ exports.returnBook = async (req, res, next) => {
     const { code: userId } = req.member;
 
     if (bookLoan.memberId !== userId) {
-      const error = new Error('Not authorized!');
+      const error = new Error("Not authorized!");
       error.code = 403;
 
       throw error;
     }
 
     if (bookLoan.returned) {
-      const error = new Error('Book already returned!');
+      const error = new Error("Book already returned!");
       error.code = 400;
 
       throw error;
     }
 
     if (new Date(bookLoan.dateDue).getTime() < Date.now()) {
-      const id = 'penalty-' + crypto.randomUUID();
+      const id = "penalty-" + crypto.randomUUID();
       const penaltyStart = new Date();
       const penaltyEnd = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);
       await prisma.penalty.create({
@@ -198,28 +198,31 @@ exports.returnBook = async (req, res, next) => {
           id,
           memberId: userId,
           penaltyStart,
-          penaltyEnd
-        }
+          penaltyEnd,
+        },
       });
     }
 
     await prisma.bookLoans.update({
       where: { id: loanId },
-      data: { returned: true }
+      data: {
+        returned: true,
+        dateReturned: new Date()
+      },
     });
 
     const book = await prisma.book.findFirst({
-      where: { code: bookLoan.bookId }
+      where: { code: bookLoan.bookId },
     });
 
     await prisma.book.update({
       where: { code: book.code },
-      data: { stock: book.stock + 1 }
+      data: { stock: book.stock + 1 },
     });
 
     res.status(200).json({
       success: true,
-      message: 'Book successfully returned!'
+      message: "Book successfully returned!",
     });
   } catch (error) {
     handleError(error, res);

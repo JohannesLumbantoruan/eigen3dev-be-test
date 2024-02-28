@@ -10,7 +10,7 @@
  *          example: johndoe
  *        password:
  *          type: string
- *          example: johndoe
+ *          example: mypassword
  *    LoginSuccess:
  *      type: object
  *      properties:
@@ -38,6 +38,45 @@
  *        message:
  *          type: string
  *          example: Member not found!
+ *    Register:
+ *      type: object
+ *      properties:
+ *        name:
+ *          type: string
+ *          example: John Doe
+ *        username:
+ *          type: string
+ *          example: johndoe
+ *        password:
+ *          type: string
+ *          example: mypassword
+ *    RegisterSuccess:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: true
+ *        member:
+ *          type: object
+ *          properties:
+ *            code:
+ *              type: string
+ *              example: user-12345
+ *            name:
+ *              type: string
+ *              example: John Doe
+ *            username:
+ *              type: string
+ *              example: johndoe
+ *    RegisterFailed:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Username already exist!
  * tags:
  *  - name: authentication
  *    description: Register and login for user
@@ -48,14 +87,14 @@
  *    summary: Login to get token
  *    description: Login to generate jwt token
  *    requestBody:
- *      description: Get token for authenticaton and authorization
+ *      description: username and password to login
  *      content:
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/Login'
  *      required: true
  *    responses:
- *      200:
+ *      201:
  *        description: Successfully get token
  *        content:
  *          application/json:
@@ -73,6 +112,32 @@
  *          application/json:
  *            schema:
  *              $ref: '#/components/schemas/LoginNotFound'
+ * /register:
+ *  post:
+ *    tags:
+ *      - authentication
+ *    summary: Register to be a member
+ *    description: Register to be a member and able to borrow a book
+ *    requestBody:
+ *      description: name, username, and password to register
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/Register'
+ *      required: true
+ *    responses:
+ *      201:
+ *        description: Successfully register
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/RegisterSuccess'
+ *      400:
+ *        description: Failed to register
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/RegisterFailed'
  */
 
 const express = require('express');

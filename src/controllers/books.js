@@ -4,7 +4,13 @@ const handleError = require("../utils/handle-error");
 
 exports.getAll = async (req, res, next) => {
   try {
-    const books = await prisma.book.findMany();
+    const books = await prisma.book.findMany({
+      where: {
+        stock: {
+          gt: 0
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,

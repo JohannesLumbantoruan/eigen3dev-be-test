@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  code      String      @id
+  name      String
+  username  String      @unique
+  password  String
+  bookLoans BookLoans[]
+  penalty   Penalty?
+
+  @@map("members")
+}
+
+model Book {
+  code      String      @id
+  title     String
+  author    String
+  stock     Int
+  bookLoans BookLoans[]
+
+  @@map("books")
+}
+
+model BookLoans {
+  id           String   @id
+  member       Member   @relation(fields: [memberId], references: [code], onDelete: Cascade)
+  memberId     String   @map("member_id")
+  book         Book     @relation(fields: [bookId], references: [code], onDelete: Cascade)
+  bookId       String   @map("book_id")
+  dateBorrowed DateTime @default(now()) @map("date_borrowed")
+  dateDue      DateTime @map("date_due")
+  returned     Boolean  @default(false)
+
+  @@map("book_loans")
+}
+
+model Penalty {
+  id           String   @id
+  member       Member   @relation(fields: [memberId], references: [code], onDelete: Cascade)
+  memberId     String   @unique @map("member_id")
+  penaltyStart DateTime @default(now()) @map("penalty_start")
+  penaltyEnd   DateTime @map("penalty_end")
+
+  @@map("penalties")
+}

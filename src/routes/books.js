@@ -1,6 +1,10 @@
 /**
  * @openapi
  * components:
+ *  securitySchemes:
+ *    bearerAuth:
+ *      type: http
+ *      scheme: bearer
  *  schemas:
  *    Books:
  *      type: object
@@ -50,32 +54,34 @@
  *    BookDetail:
  *      allOf:
  *        - $ref: '#/components/schemas/CreateBookSuccess'
- *        - type: object
- *          properties:
- *            bookLoans:
- *              type: object
- *              properties:
- *                id:
- *                  type: string
- *                  example: bl-12345
- *                memberId:
- *                  type: string
- *                  example: member-12345
- *                bookId:
- *                  type: string
- *                  example: book-12345
- *                dateBorrowed:
- *                  type: string
- *                  example: 2024-02-28T08:25:29.236Z
- *                dateDue:
- *                  type: string
- *                  example: 2024-03-06T08:25:29.236Z
- *                dateReturned:
- *                  type: string
- *                  example: 2024-02-28T08:25:56.136Z
- *                returned:
- *                  type: boolean
- *                  example: true
+ *        - $ref: '#/components/schemas/BorrowBookSuccess'
+ *    BorrowBookSuccess:
+ *      type: object
+ *      properties:
+ *         bookLoans:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               example: bl-12345
+ *             memberId:
+ *               type: string
+ *               example: member-12345
+ *             bookId:
+ *               type: string
+ *               example: book-12345
+ *             dateBorrowed:
+ *               type: string
+ *               example: 2024-02-28T08:25:29.236Z
+ *             dateDue:
+ *               type: string
+ *               example: 2024-03-06T08:25:29.236Z
+ *             dateReturned:
+ *               type: string
+ *               example: 2024-02-28T08:25:56.136Z
+ *             returned:
+ *               type: boolean
+ *               example: true
  * tags:
  *  - name: books
  *    description: All operations for path books
@@ -97,6 +103,8 @@
  *      - books
  *    summary: Create a new book
  *    description: Create a new book
+ *    security:
+ *      - bearerAuth: []
  *    requestBody:
  *      description: title, author, and stock to create a new book
  *      content:
@@ -131,6 +139,21 @@
  *          application/json:
  *            schema:
  *              $ref: '#/components/schemas/BookDetail'
+ * /books/{code}/borrow:
+ *  post:
+ *    tags:
+ *      - books
+ *    summary: Borrow a book
+ *    description: Borrow a book
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      201:
+ *        description: Successfully borrow a book
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/BorrowBookSuccess'
  */
 
 const express = require("express");
@@ -144,6 +167,6 @@ router.get("/books", getAll);
 router.post("/books", authenticate, store);
 router.get("/books/:code", getById);
 router.post("/books/:code/borrow", authenticate, borrow);
-router.put('/books/:loanId/return/', authenticate, returnBook);
+router.put('/books/:loanId/return', authenticate, returnBook);
 
 module.exports = router;

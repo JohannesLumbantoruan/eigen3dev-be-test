@@ -61,7 +61,7 @@
  *          properties:
  *            code:
  *              type: string
- *              example: user-12345
+ *              example: member-12345
  *            name:
  *              type: string
  *              example: John Doe

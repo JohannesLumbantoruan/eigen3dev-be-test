@@ -97,7 +97,7 @@ exports.borrow = async (req, res, next) => {
       }
     });
 
-    if (new Date(penalty?.penaltyEnd).getTime() > Date.now()) {
+    if (penalty && new Date(penalty.penaltyEnd).getTime() > Date.now()) {
       const error = new Error('Can\'t borrow, you are still penalized!');
       error.code = 400;
 
@@ -178,9 +178,16 @@ exports.returnBook = async (req, res, next) => {
       throw error;
     }
 
+    if (bookLoan.returned) {
+      const error = new Error('Book already returned!');
+      error.code = 400;
+
+      throw error;
+    }
+
     const { code: userId } = req.member;
 
-    if (new Date(bookLoan.dateDue).getTime() > Date.now()) {
+    if (new Date(bookLoan.dateDue).getTime() < Date.now()) {
       const id = 'penalty-' + crypto.randomUUID();
       const penaltyStart = new Date();
       const penaltyEnd = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);

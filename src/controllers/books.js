@@ -160,17 +160,6 @@ exports.returnBook = async (req, res, next) => {
   const { loanId } = req.params;
 
   try {
-    // const book = await prisma.book.findFirst({
-    //   where: { code }
-    // });
-
-    // if (!book) {
-    //   const error = new Error('Book not found!');
-    //   error.code = 404;
-
-    //   throw error;
-    // }
-
     const bookLoan = await prisma.bookLoans.findFirst({
       where: {
         id: loanId
@@ -184,14 +173,21 @@ exports.returnBook = async (req, res, next) => {
       throw error;
     }
 
+    const { code: userId } = req.member;
+
+    if (bookLoan.memberId !== userId) {
+      const error = new Error('Not authorized!');
+      error.code = 403;
+
+      throw error;
+    }
+
     if (bookLoan.returned) {
       const error = new Error('Book already returned!');
       error.code = 400;
 
       throw error;
     }
-
-    const { code: userId } = req.member;
 
     if (new Date(bookLoan.dateDue).getTime() < Date.now()) {
       const id = 'penalty-' + crypto.randomUUID();

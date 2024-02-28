@@ -157,19 +157,19 @@ exports.borrow = async (req, res, next) => {
 };
 
 exports.returnBook = async (req, res, next) => {
-  const { code, loanId } = req.params;
+  const { loanId } = req.params;
 
   try {
-    const book = await prisma.book.findFirst({
-      where: { code }
-    });
+    // const book = await prisma.book.findFirst({
+    //   where: { code }
+    // });
 
-    if (!book) {
-      const error = new Error('Book not found!');
-      error.code = 404;
+    // if (!book) {
+    //   const error = new Error('Book not found!');
+    //   error.code = 404;
 
-      throw error;
-    }
+    //   throw error;
+    // }
 
     const bookLoan = await prisma.bookLoans.findFirst({
       where: {
@@ -212,8 +212,12 @@ exports.returnBook = async (req, res, next) => {
       data: { returned: true }
     });
 
+    const book = await prisma.book.findFirst({
+      where: { code: bookLoan.bookId }
+    });
+
     await prisma.book.update({
-      where: { code },
+      where: { code: book.code },
       data: { stock: book.stock + 1 }
     });
 

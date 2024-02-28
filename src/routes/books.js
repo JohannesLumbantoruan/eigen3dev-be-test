@@ -9,6 +9,6 @@ router.get("/books", getAll);
 router.post("/books", authenticate, store);
 router.get("/books/:code", getById);
 router.post("/books/:code/borrow", authenticate, borrow);
-router.put('/books/:code/return/:loanId', authenticate, returnBook);
+router.put('/books/:loanId/return/', authenticate, returnBook);
 
 module.exports = router;

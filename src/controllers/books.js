@@ -51,8 +51,11 @@ exports.getById = async (req, res, next) => {
   try {
     const book = await prisma.book.findFirst({
       where: {
-        code,
+        code
       },
+      include: {
+        bookLoans: true
+      }
     });
 
     if (!book) {

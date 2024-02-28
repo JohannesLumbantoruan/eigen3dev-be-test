@@ -82,6 +82,87 @@
  *             returned:
  *               type: boolean
  *               example: true
+ *    BorrowBookNotFound:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Book not found!
+ *    BorrowBookAllBorrowed:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: All book already borrowed!
+ *    BorrowBookPenalized:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Can't borrow, you are still penalized!
+ *    BorrowBookOnlyTwo:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: You can't borrow more than 2 books!
+ *    BookReturned:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: true
+ *        message:
+ *          type: string
+ *          example: Book successfully returned!
+ *    BookReturnedAlready:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Book already returned!
+ *    BookReturnedIncorrectMember:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Not authorized!
+ *    BookReturnedNotFound:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Book loan not found!
+ *    InvalidToken:
+ *      type: object
+ *      properties:
+ *        success:
+ *          type: boolean
+ *          example: false
+ *        message:
+ *          type: string
+ *          example: Invalid token!
  * tags:
  *  - name: books
  *    description: All operations for path books
@@ -147,6 +228,13 @@
  *    description: Borrow a book
  *    security:
  *      - bearerAuth: []
+ *    parameters:
+ *      - name: code
+ *        in: path
+ *        description: The code of the book
+ *        required: true
+ *        schema:
+ *          type: string
  *    responses:
  *      201:
  *        description: Successfully borrow a book
@@ -154,6 +242,73 @@
  *          application/json:
  *            schema:
  *              $ref: '#/components/schemas/BorrowBookSuccess'
+ *      404:
+ *        description: Book not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/BorrowBookNotFound'
+ *      400:
+ *        description: All book already borrowed
+ *        content:
+ *          application/json:
+ *            schema:
+ *              oneOf:
+ *              - $ref: '#/components/schemas/BorrowBookAllBorrowed'
+ *              - $ref: '#/components/schemas/BorrowBookPenalized'
+ *              - $ref: '#/components/schemas/BorrowBookOnlyTwo'
+ *      401:
+ *        description: No token or invalid token in request headers
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/InvalidToken'
+ * /books/{loanId}/return:
+ *  put:
+ *    tags:
+ *      - books
+ *    summary: Return a book
+ *    description: Return a borrowed book
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - name: loanId
+ *        in: path
+ *        description: The id of the book loan
+ *        required: true
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: Successfully return a book
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/BookReturned'
+ *      400:
+ *        description: Returning book that already return
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/BookReturnedAlready'
+ *      403:
+ *        description: Book returned by incorrect member
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/BookReturnedIncorrectMember'
+ *      404:
+ *        description: Book loan not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/BookReturnedNotFound'
+ *      401:
+ *        description: No token or invalid token in request headers
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/InvalidToken'
  */
 
 const express = require("express");
